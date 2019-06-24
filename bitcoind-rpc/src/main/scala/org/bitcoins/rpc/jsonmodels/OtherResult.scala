@@ -53,8 +53,8 @@ case class BlockTransaction(
 
 case class GetMiningInfoResult(
     blocks: Int,
-    currentblockweight: Int,
-    currentblocktx: Int,
+    currentblockweight: Option[Int],
+    currentblocktx: Option[Int],
     difficulty: BigDecimal,
     networkhashps: BigDecimal,
     pooledtx: Int,
@@ -99,8 +99,6 @@ trait ValidateAddressResult {
   @deprecated("Use 'getaddressinfo' instead", since = "0.16")
   def hex: Option[String]
 
-  @deprecated("Use 'getaddressinfo' instead", since = "0.16")
-  def addresses: Option[Vector[BitcoinAddress]]
   def sigsrequired: Option[Int]
 
   @deprecated("Use 'getaddressinfo' instead", since = "0.16")
@@ -117,6 +115,15 @@ trait ValidateAddressResult {
 
   @deprecated("Use 'getaddressinfo' instead", since = "0.16")
   def hdmasterkeyid: Option[Sha256Hash160Digest]
+
+  @deprecated("Use 'getaddressinfo' instead", since = "0.16")
+  def ischange: Boolean
+
+  @deprecated("Use 'getaddressinfo' instead", since = "0.16")
+  def solvable: Boolean
+
+  @deprecated("Use 'getaddressinfo' instead", since = "0.16")
+  def desc: Option[String]
 }
 
 case class ValidateAddressResultImpl(
@@ -128,13 +135,15 @@ case class ValidateAddressResultImpl(
     isscript: Option[Boolean],
     script: Option[String],
     hex: Option[String],
-    addresses: Option[Vector[BitcoinAddress]],
     sigsrequired: Option[Int],
     pubkey: Option[ECPublicKey],
     iscompressed: Option[Boolean],
     account: Option[String],
     hdkeypath: Option[String],
-    hdmasterkeyid: Option[Sha256Hash160Digest])
+    hdmasterkeyid: Option[Sha256Hash160Digest],
+    ischange: Boolean,
+    solvable: Boolean,
+    desc: Option[String])
     extends ValidateAddressResult
 
 case class EstimateSmartFeeResult(
@@ -148,3 +157,5 @@ case class TestMempoolAcceptResult(
     allowed: Boolean,
     rejectReason: Option[String]
 )
+
+case class SubmitHeaderResult()

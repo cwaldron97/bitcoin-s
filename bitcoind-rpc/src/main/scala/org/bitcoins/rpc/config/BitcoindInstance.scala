@@ -50,6 +50,8 @@ sealed trait BitcoindInstance extends BitcoinSLogger {
         BitcoindVersion.V16
       case _: String if foundVersion.startsWith(BitcoindVersion.V17.toString) =>
         BitcoindVersion.V17
+      case _: String if foundVersion.startsWith(BitcoindVersion.V18.toString) =>
+        BitcoindVersion.V18
       case _: String => BitcoindVersion.Unknown
     }
   }
@@ -97,6 +99,7 @@ object BitcoindInstance {
 
     val path = cmd
     new File(path.trim)
+
   }
 
   /** Constructs a `bitcoind` instance from the given datadir, using the

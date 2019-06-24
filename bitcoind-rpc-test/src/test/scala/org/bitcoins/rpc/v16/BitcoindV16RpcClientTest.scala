@@ -26,7 +26,7 @@ class BitcoindV16RpcClientTest extends BitcoindRpcTest {
   lazy val clientsF: Future[(BitcoindV16RpcClient, BitcoindV16RpcClient)] =
     BitcoindRpcTestUtil.createNodePairV16(clientAccum)
 
-  behavior of "BitoindV16RpcClient"
+  behavior of "BitcoindV16RpcClient"
 
   it should "be able to start a V16 bitcoind" in {
     for {

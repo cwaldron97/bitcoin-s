@@ -4,6 +4,7 @@ import java.net.URI
 
 import org.bitcoins.core.currency.Bitcoins
 import org.bitcoins.core.number.{UInt32, UInt64}
+import org.bitcoins.core.wallet.fee.{SatoshisPerByte, SatoshisPerKiloByte}
 
 sealed abstract class NetworkResult
 
@@ -72,7 +73,8 @@ case class Peer(
     inflight: Vector[Int],
     whitelisted: Boolean,
     bytessent_per_msg: Map[String, Int],
-    bytesrecv_per_msg: Map[String, Int])
+    bytesrecv_per_msg: Map[String, Int],
+    min_fee_filter: SatoshisPerKiloByte)
     extends NetworkResult
 
 case class PeerNetworkInfo(

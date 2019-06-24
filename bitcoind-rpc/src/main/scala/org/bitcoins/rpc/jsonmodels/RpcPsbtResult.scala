@@ -7,6 +7,9 @@ import org.bitcoins.core.protocol.script.ScriptPubKey
 import org.bitcoins.core.protocol.transaction.Transaction
 import org.bitcoins.core.script.ScriptType
 import org.bitcoins.core.script.crypto.HashType
+import play.api.libs.json.JsArray
+
+import scala.concurrent.duration.FiniteDuration
 
 sealed abstract class RpcPsbtResult
 
@@ -69,3 +72,52 @@ final case class WalletCreateFundedPsbtResult(
     fee: Bitcoins,
     changepos: Int
 ) extends RpcPsbtResult
+
+final case class AnalyzePsbtResult(
+    inputs: Vector[AnalyzePsbtInput],
+    estimated_vsize: Option[Double],
+    estimated_feerate: Option[Double],
+    fee: Option[Bitcoins],
+    next: String
+) extends RpcPsbtResult
+final case class AnalyzePsbtInput(
+    has_utxo: Boolean,
+    is_final: Boolean,
+    missing: Option[PsbtMissingData],
+    next: Option[String]
+) extends RpcPsbtResult
+final case class PsbtMissingData(
+    pubkeys: Option[Vector[ECPublicKey]],
+    signatures: Option[Vector[ECDigitalSignature]],
+    redeemscript: Option[RpcPsbtScript],
+    witnessscript: Option[RpcPsbtScript]
+) extends RpcPsbtResult
+
+// todo Unsure where to place these probably not in the Psbtresults change
+final case class GetNodeAddressesResult(
+    time: FiniteDuration,
+    services: Int,
+    address: java.net.URI,
+    port: Int
+) extends RpcPsbtResult
+final case class ListWalletDirResult(
+    wallets: Vector[ArrayOfWalletsInput]
+) extends RpcPsbtResult
+final case class ArrayOfWalletsInput(
+    name: String
+) extends RpcPsbtResult
+final case class DeriveAddressesResult(addresses: Vector[BitcoinAddress])
+    extends RpcPsbtResult
+final case class GetDescriptorInfoResult(
+    descriptor: String,
+    isrange: Boolean,
+    issolvable: Boolean,
+    hasprivatekey: Boolean
+)
+final case class RpcCommands(
+    method: String,
+    duration: FiniteDuration //this time is in microseconds
+)
+final case class GetRpcInfoResult(
+    active_commands: Vector[RpcCommands]
+)

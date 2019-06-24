@@ -2,6 +2,7 @@ package org.bitcoins.rpc.serializers
 
 import java.io.File
 import java.net.{InetAddress, URI}
+import java.util.concurrent.TimeUnit
 
 import org.bitcoins.core.crypto._
 import org.bitcoins.core.currency.{Bitcoins, Satoshis}
@@ -29,6 +30,9 @@ import org.bitcoins.rpc.serializers.JsonWriters._
 import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration.DurationLong
 
 object JsonSerializers {
   implicit val bigIntReads: Reads[BigInt] = BigIntReads
@@ -368,8 +372,53 @@ object JsonSerializers {
 
   implicit val rpcPsbtInputReads: Reads[RpcPsbtInput] = RpcPsbtInputReads
 
-  implicit val decodePsbtResult: Reads[DecodePsbtResult] =
+  implicit val decodePsbtResultReads: Reads[DecodePsbtResult] =
     Json.reads[DecodePsbtResult]
+
+  implicit val psbtMissingDataReads: Reads[PsbtMissingData] =
+    Json.reads[PsbtMissingData]
+
+  implicit val analyzePsbtInputReads: Reads[AnalyzePsbtInput] =
+    Json.reads[AnalyzePsbtInput]
+
+  implicit val analyzePsbtResultReads: Reads[AnalyzePsbtResult] =
+    Json.reads[AnalyzePsbtResult]
+
+  implicit val getNodeAddressesReads: Reads[GetNodeAddressesResult] = { js =>
+    for {
+      time <- js.validate[Long].map(_.seconds)
+      services <- js.validate[Int]
+      address <- js.validate[URI]
+      port <- js.validate[Int]
+    } yield GetNodeAddressesResult(time, services, address, port)
+  }
+
+  implicit val RpcCommandsReads: Reads[RpcCommands] = { js =>
+    for {
+      method <- js.validate[String]
+      duration <- js
+        .validate[Long]
+        .map(_.microseconds)
+    } yield RpcCommands(method, duration)
+  }
+
+  implicit val GetRpcInfoResultReads: Reads[GetRpcInfoResult] =
+    Json.reads[GetRpcInfoResult]
+
+  implicit val arrayOfWalletsInputReads: Reads[ArrayOfWalletsInput] =
+    Json.reads[ArrayOfWalletsInput]
+
+  implicit val listWalletsDirResultReads: Reads[ListWalletDirResult] =
+    Json.reads[ListWalletDirResult]
+
+  implicit val deriveAddressesResultReads: Reads[DeriveAddressesResult] =
+    Json.reads[DeriveAddressesResult]
+
+  implicit val submitHeaderResultReads: Reads[SubmitHeaderResult] =
+    Json.reads[SubmitHeaderResult]
+
+  implicit val getDescriptorInfoResultReads: Reads[GetDescriptorInfoResult] =
+    Json.reads[GetDescriptorInfoResult]
 
   implicit val walletCreateFundedPsbtResultReads: Reads[
     WalletCreateFundedPsbtResult] = Json.reads[WalletCreateFundedPsbtResult]

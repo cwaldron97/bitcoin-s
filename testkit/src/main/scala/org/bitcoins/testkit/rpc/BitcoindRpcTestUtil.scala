@@ -1,11 +1,12 @@
 package org.bitcoins.testkit.rpc
 
+import java.io.File
 import java.net.URI
-import java.nio.file.Paths
+import java.nio.file.{Path, Paths}
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-
+import com.typesafe.config.{Config, ConfigFactory}
 import org.bitcoins.core.config.RegTest
 import org.bitcoins.core.crypto.{
   DoubleSha256Digest,
@@ -30,8 +31,10 @@ import org.bitcoins.rpc.client.common.{
 }
 import org.bitcoins.rpc.client.v16.BitcoindV16RpcClient
 import org.bitcoins.rpc.client.v17.BitcoindV17RpcClient
+import org.bitcoins.rpc.client.v18.BitcoindV18RpcClient
 import org.bitcoins.rpc.config.{
   BitcoindAuthCredentials,
+  BitcoindConfig,
   BitcoindInstance,
   ZmqConfig
 }
@@ -143,6 +146,7 @@ trait BitcoindRpcTestUtil extends BitcoinSLogger {
 
   private val V16_ENV = "BITCOIND_V16_PATH"
   private val V17_ENV = "BITCOIND_V17_PATH"
+  private val V18_ENV = "BITCOIND_V18_PATH"
 
   private def getFileFromEnv(env: String): File = {
     val envValue = Properties
@@ -166,6 +170,7 @@ trait BitcoindRpcTestUtil extends BitcoinSLogger {
     version match {
       case BitcoindVersion.V16     => getFileFromEnv(V16_ENV)
       case BitcoindVersion.V17     => getFileFromEnv(V17_ENV)
+      case BitcoindVersion.V18     => getFileFromEnv(V18_ENV)
       case BitcoindVersion.Unknown => BitcoindInstance.DEFAULT_BITCOIND_LOCATION
     }
 
@@ -220,6 +225,18 @@ trait BitcoindRpcTestUtil extends BitcoinSLogger {
              zmqPort = zmqPort,
              pruneMode = pruneMode,
              versionOpt = Some(BitcoindVersion.V17))
+
+  def v18Instance(
+      port: Int = RpcUtil.randomPort,
+      rpcPort: Int = RpcUtil.randomPort,
+      zmqPort: Int = RpcUtil.randomPort,
+      pruneMode: Boolean = false
+  ): BitcoindInstance =
+    instance(port = port,
+             rpcPort = rpcPort,
+             zmqPort = zmqPort,
+             pruneMode = pruneMode,
+             versionOpt = Some(BitcoindVersion.V18))
 
   def startServers(servers: Vector[BitcoindRpcClient])(
       implicit ec: ExecutionContext): Future[Unit] = {
@@ -526,6 +543,8 @@ trait BitcoindRpcTestUtil extends BitcoinSLogger {
           new BitcoindV16RpcClient(BitcoindRpcTestUtil.v16Instance())
         case BitcoindVersion.V17 =>
           new BitcoindV17RpcClient(BitcoindRpcTestUtil.v17Instance())
+        case BitcoindVersion.V18 =>
+          new BitcoindV18RpcClient(BitcoindRpcTestUtil.v18Instance())
       }
 
       // this is safe as long as this method is never
@@ -628,6 +647,17 @@ trait BitcoindRpcTestUtil extends BitcoinSLogger {
   )(implicit system: ActorSystem): Future[
     (BitcoindV17RpcClient, BitcoindV17RpcClient, BitcoindV17RpcClient)] = {
     createNodeTripleInternal(BitcoindVersion.V17, clientAccum)
+  }
+
+  /**
+    * Returns a triple of [[org.bitcoins.rpc.client.v18.BitcoindV18RpcClient BitcoindV18RpcClient]]
+    * that are connected with some blocks in the chain
+    */
+  def createNodeTripleV18(
+      clientAccum: RpcClientAccum = Vector.newBuilder
+  )(implicit system: ActorSystem): Future[
+    (BitcoindV18RpcClient, BitcoindV18RpcClient, BitcoindV18RpcClient)] = {
+    createNodeTripleInternal(BitcoindVersion.V18, clientAccum)
   }
 
   def createRawCoinbaseTransaction(
