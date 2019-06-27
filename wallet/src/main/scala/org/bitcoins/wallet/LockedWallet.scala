@@ -52,7 +52,7 @@ abstract class LockedWallet extends LockedWalletApi with BitcoinSLogger {
   }
 
   // TODO account for outgoing TXs
-  override def getBalance(): Future[CurrencyUnit] =
+  override def getConfirmedBalance(): Future[CurrencyUnit] =
     filterThenSum(_.confirmations > 0)
 
   // TODO account for outgoing TXs
