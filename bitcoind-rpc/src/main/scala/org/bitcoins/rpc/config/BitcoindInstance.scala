@@ -9,7 +9,8 @@ import org.bitcoins.rpc.client.common.BitcoindVersion
 import scala.sys.process._
 import org.bitcoins.core.util.BitcoinSLogger
 import org.bitcoins.core.config.NetworkParameters
-import scala.util.Try
+
+import scala.util.{Properties, Try}
 import java.nio.file.Files
 
 /**
@@ -38,9 +39,10 @@ sealed trait BitcoindInstance extends BitcoinSLogger {
   def getVersion: BitcoindVersion = {
 
     val binaryPath = binary.getAbsolutePath
-    val foundVersion = Seq(binaryPath, "--version").!!.split("\n").head
-      .split(" ")
-      .last
+    val foundVersion =
+      Seq(binaryPath, "--version").!!.split(Properties.lineSeparator).head
+        .split(" ")
+        .last
 
     foundVersion match {
       case _: String if foundVersion.startsWith(BitcoindVersion.V16.toString) =>
@@ -54,7 +56,7 @@ sealed trait BitcoindInstance extends BitcoinSLogger {
   def p2pPort: Int = uri.getPort
 }
 
-object BitcoindInstance {
+object BitcoindInstance extends BitcoinSLogger {
   private case class BitcoindInstanceImpl(
       network: NetworkParameters,
       uri: URI,
@@ -84,9 +86,11 @@ object BitcoindInstance {
   }
 
   lazy val DEFAULT_BITCOIND_LOCATION: File = {
-    val path = Try("which bitcoind".!!)
-      .getOrElse(
-        throw new RuntimeException("Could not locate bitcoind on user PATH"))
+    val path = if (Properties.isWin) {
+      "which bitcoind.exe".!!
+    } else {
+      "which bitcoind.exe".!!
+    }
     new File(path.trim)
   }
 
@@ -101,8 +105,9 @@ object BitcoindInstance {
     require(datadir.isDirectory, s"${datadir.getPath} is not a directory!")
 
     val configPath = Paths.get(datadir.getAbsolutePath, "bitcoin.conf")
+    logger.info(s"configPath: $configPath")
+    logger.info(s"${Files.readAllLines(configPath)}")
     if (Files.exists(configPath)) {
-
       val file = configPath.toFile()
       fromConfigFile(file)
     } else {

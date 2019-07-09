@@ -179,9 +179,10 @@ trait Client extends BitcoinSLogger {
     val responseF = sendRequest(request)
 
     val payloadF: Future[JsValue] = responseF.flatMap(getPayload)
-
+    payloadF.failed.foreach(err => logger.error(s"err=${err}"))
     // Ping successful if no error can be parsed from the payload
     val parsedF = payloadF.map { payload =>
+      logger.error(s"payload= ${payload}")
       (payload \ errorKey).validate[RpcError] match {
         case _: JsSuccess[RpcError] => false
         case _: JsError             => true
@@ -216,7 +217,11 @@ trait Client extends BitcoinSLogger {
       reader: Reads[T]): Future[T] = {
 
     val request = buildRequest(instance, command, JsArray(parameters))
+    logger.info(s"Sending request: $request")
     val responseF = sendRequest(request)
+    responseF.foreach { res =>
+      println(s"response: $res")
+    }
 
     val payloadF: Future[JsValue] = responseF.flatMap(getPayload)
 
@@ -285,7 +290,8 @@ trait Client extends BitcoinSLogger {
     val payloadF = response.entity.dataBytes.runFold(ByteString.empty)(_ ++ _)
 
     payloadF.map { payload =>
-      Json.parse(payload.decodeString(ByteString.UTF_8))
+      val decoded = payload.decodeString(ByteString.UTF_8)
+      Json.parse(decoded)
     }
   }
 
