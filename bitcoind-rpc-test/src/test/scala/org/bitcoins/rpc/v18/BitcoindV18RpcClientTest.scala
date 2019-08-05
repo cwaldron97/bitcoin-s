@@ -60,4 +60,14 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
     }
   }
 
+  it should "get node address" in {
+    val nodeF = clientF.flatMap(client => client.getNodeAddresses())
+
+    nodeF.map { result =>
+      assert(result.head.address.isAbsolute)
+      assert(result.head.services >= 0)
+      assert(result.nonEmpty)
+    }
+  }
+
 }

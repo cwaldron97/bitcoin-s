@@ -157,5 +157,3 @@ case class TestMempoolAcceptResult(
     allowed: Boolean,
     rejectReason: Option[String]
 )
-
-case class SubmitHeaderResult()

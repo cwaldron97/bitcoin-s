@@ -1,13 +1,13 @@
 package org.bitcoins.rpc.client.v18
+import org.bitcoins.core.protocol.blockchain.BlockHeader
 import org.bitcoins.rpc.client.common.Client
 import org.bitcoins.rpc.jsonmodels.{
   GetNodeAddressesResult,
   GetRpcInfoResult,
-  ListWalletDirResult,
-  SubmitHeaderResult
+  ListWalletDirResult
 }
 import org.bitcoins.rpc.serializers.JsonSerializers._
-import play.api.libs.json.{JsString, Json}
+import play.api.libs.json.{JsArray, JsObject, JsString, Json}
 
 import scala.concurrent.Future
 
@@ -41,8 +41,8 @@ trait V18AssortedRpc {
     bitcoindCall[GetRpcInfoResult]("getrpcinfo")
   }
 
-  def submitHeader(hexData: String): Future[SubmitHeaderResult] = {
-    bitcoindCall[SubmitHeaderResult]("submitheader", List(JsString(hexData)))
+  def submitHeader(header: BlockHeader): Future[Unit] = {
+    bitcoindCall[Unit]("submitheader", List(JsString(header.hex)))
   }
 
 }
