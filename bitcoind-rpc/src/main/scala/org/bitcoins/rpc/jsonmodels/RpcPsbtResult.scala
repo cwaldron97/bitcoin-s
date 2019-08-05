@@ -7,9 +7,6 @@ import org.bitcoins.core.protocol.script.ScriptPubKey
 import org.bitcoins.core.protocol.transaction.Transaction
 import org.bitcoins.core.script.ScriptType
 import org.bitcoins.core.script.crypto.HashType
-import play.api.libs.json.JsArray
-
-import scala.concurrent.duration.FiniteDuration
 
 sealed abstract class RpcPsbtResult
 
@@ -92,32 +89,3 @@ final case class PsbtMissingData(
     redeemscript: Option[RpcPsbtScript],
     witnessscript: Option[RpcPsbtScript]
 ) extends RpcPsbtResult
-
-// todo Unsure where to place these probably not in the Psbtresults change
-final case class GetNodeAddressesResult(
-    time: FiniteDuration,
-    services: Int,
-    address: java.net.URI,
-    port: Int
-) extends RpcPsbtResult
-final case class ListWalletDirResult(
-    wallets: Vector[ArrayOfWalletsInput]
-) extends RpcPsbtResult
-final case class ArrayOfWalletsInput(
-    name: String
-) extends RpcPsbtResult
-final case class DeriveAddressesResult(addresses: Vector[BitcoinAddress])
-    extends RpcPsbtResult
-final case class GetDescriptorInfoResult(
-    descriptor: String,
-    isrange: Boolean,
-    issolvable: Boolean,
-    hasprivatekey: Boolean
-)
-final case class RpcCommands(
-    method: String,
-    duration: FiniteDuration //this time is in microseconds
-)
-final case class GetRpcInfoResult(
-    active_commands: Vector[RpcCommands]
-)

@@ -1,6 +1,9 @@
 package org.bitcoins.rpc.v18
+import org.bitcoins.chain.models.BlockHeaderDbHelper
+import org.bitcoins.core.protocol.blockchain.RegTestNetChainParams
 import org.bitcoins.rpc.client.common.BitcoindVersion
 import org.bitcoins.rpc.client.v18.BitcoindV18RpcClient
+import org.bitcoins.testkit.chain.BlockHeaderHelper
 import org.bitcoins.testkit.rpc.BitcoindRpcTestUtil
 import org.bitcoins.testkit.util.BitcoindRpcTest
 
@@ -68,6 +71,15 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
       assert(result.head.services >= 0)
       assert(result.nonEmpty)
     }
+  }
+
+  it should "successfully submit a header" in {
+    val genesisHeader = RegTestNetChainParams.genesisBlock.blockHeader
+    val genesisHeaderDb =
+      BlockHeaderDbHelper.fromBlockHeader(height = 1, genesisHeader)
+    val nextHeader = BlockHeaderHelper.buildNextHeader(genesisHeaderDb)
+    clientF.flatMap(client =>
+      client.submitHeader(nextHeader.blockHeader).map(_ => succeed))
   }
 
 }

@@ -157,3 +157,13 @@ case class TestMempoolAcceptResult(
     allowed: Boolean,
     rejectReason: Option[String]
 )
+
+final case class DeriveAddressesResult(addresses: Vector[BitcoinAddress])
+    extends OtherResult
+
+final case class GetDescriptorInfoResult(
+    descriptor: String,
+    isrange: Boolean,
+    issolvable: Boolean,
+    hasprivatekey: Boolean
+) extends OtherResult

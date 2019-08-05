@@ -6,6 +6,8 @@ import org.bitcoins.core.currency.Bitcoins
 import org.bitcoins.core.number.{UInt32, UInt64}
 import org.bitcoins.core.wallet.fee.{SatoshisPerByte, SatoshisPerKiloByte}
 
+import scala.concurrent.duration.FiniteDuration
+
 sealed abstract class NetworkResult
 
 case class Node(
@@ -100,3 +102,10 @@ case class NodeBan(
     ban_created: UInt32,
     ban_reason: String)
     extends NetworkResult
+
+final case class GetNodeAddressesResult(
+    time: FiniteDuration,
+    services: Int,
+    address: java.net.URI,
+    port: Int
+) extends NetworkResult
