@@ -7,7 +7,7 @@ import org.bitcoins.rpc.jsonmodels.{
   ListWalletDirResult
 }
 import org.bitcoins.rpc.serializers.JsonSerializers._
-import play.api.libs.json.{JsArray, JsObject, JsString, Json}
+import play.api.libs.json.{JsString, Json}
 
 import scala.concurrent.Future
 
