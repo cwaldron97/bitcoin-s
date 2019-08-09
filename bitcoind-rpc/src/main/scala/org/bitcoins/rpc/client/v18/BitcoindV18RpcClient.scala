@@ -1,21 +1,8 @@
 package org.bitcoins.rpc.client.v18
 import akka.actor.ActorSystem
-import org.bitcoins.rpc.client.common.{
-  BitcoindRpcClient,
-  BitcoindVersion,
-  Client
-}
+import org.bitcoins.rpc.client.common.{BitcoindRpcClient, BitcoindVersion}
 import org.bitcoins.rpc.config.BitcoindInstance
-import org.bitcoins.rpc.jsonmodels.{
-  GetNodeAddressesResult,
-  GetRpcInfoResult,
-  ListWalletDirResult,
-  SubmitHeaderResult
-}
-import org.bitcoins.rpc.serializers.JsonSerializers._
-import play.api.libs.json.{JsString, Json}
 
-import scala.concurrent.Future
 import scala.util.Try
 
 /**

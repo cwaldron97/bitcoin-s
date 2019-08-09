@@ -2,7 +2,6 @@ package org.bitcoins.rpc.serializers
 
 import java.io.File
 import java.net.{InetAddress, URI}
-import java.util.concurrent.TimeUnit
 
 import org.bitcoins.core.crypto._
 import org.bitcoins.core.currency.{Bitcoins, Satoshis}
@@ -31,7 +30,6 @@ import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.duration.DurationLong
 
 object JsonSerializers {

@@ -9,6 +9,7 @@ import org.bitcoins.core.crypto.{
 import org.bitcoins.core.currency.Satoshis
 import org.bitcoins.core.number.UInt32
 import org.bitcoins.core.protocol.BitcoinAddress
+import org.bitcoins.core.protocol.blockchain.BlockHeader
 import org.bitcoins.core.protocol.script.ScriptPubKey
 import org.bitcoins.core.protocol.transaction.Transaction
 import org.bitcoins.core.wallet.fee.BitcoinFeeUnit
@@ -167,3 +168,5 @@ final case class GetDescriptorInfoResult(
     issolvable: Boolean,
     hasprivatekey: Boolean
 ) extends OtherResult
+
+final case class SubmitHeaderResult(header: BlockHeader) extends OtherResult
