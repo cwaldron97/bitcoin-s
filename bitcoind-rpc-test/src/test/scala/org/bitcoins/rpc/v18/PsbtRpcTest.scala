@@ -11,9 +11,10 @@ class PsbtRpcTest extends BitcoindRpcTest {
   lazy val clientF: Future[BitcoindV18RpcClient] = {
     val client = new BitcoindV18RpcClient(BitcoindRpcTestUtil.v18Instance())
     val clientIsStartedF = BitcoindRpcTestUtil.startServers(Vector(client))
+    clientIsStartedF.map(_ => client)
   }
 
-  clientAccum.+=(clientF)
+  clientF.map(c => clientAccum.+=(c))
 
   behavior of "PsbtRpc"
 
