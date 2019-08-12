@@ -65,7 +65,7 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
     }
   }
 
-  it should "get node address" in {
+  it should "get node address given a null parameter" in {
     val nodeF = clientF.flatMap(client => client.getNodeAddresses())
 
     nodeF.map { result =>
@@ -73,6 +73,16 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
       assert(result.head.services >= 0)
       assert(result.nonEmpty)
     }
+  }
+
+  it should "get node addresses given a count" in {
+    val nodeF = clientF.flatMap(client => client.getNodeAddresses(3))
+
+    nodeF.map({ result =>
+      assert(result.head.address.isAbsolute)
+      assert(result.head.services >= 0)
+      assert(result.nonEmpty)
+    })
   }
 
   it should "successfully submit a header" in {
