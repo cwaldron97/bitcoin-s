@@ -1,40 +1,32 @@
 package org.bitcoins.server
 
-import org.bitcoins.rpc.config.BitcoindInstance
-import org.bitcoins.node.models.Peer
-import org.bitcoins.core.util.BitcoinSLogger
-import org.bitcoins.rpc.client.common.BitcoindRpcClient
-import akka.actor.ActorSystem
-import scala.concurrent.Await
-import scala.concurrent.duration._
-import org.bitcoins.wallet.config.WalletAppConfig
-import org.bitcoins.node.config.NodeAppConfig
 import java.nio.file.Files
-import scala.concurrent.Future
-import org.bitcoins.wallet.LockedWallet
-import org.bitcoins.wallet.Wallet
-import org.bitcoins.wallet.api.InitializeWalletSuccess
-import org.bitcoins.wallet.api.InitializeWalletError
-import org.bitcoins.node.SpvNode
-import org.bitcoins.chain.blockchain.ChainHandler
-import org.bitcoins.chain.models.BlockHeaderDAO
-import org.bitcoins.chain.config.ChainAppConfig
-import org.bitcoins.wallet.api.UnlockedWalletApi
-import org.bitcoins.wallet.api.UnlockWalletSuccess
-import org.bitcoins.wallet.api.UnlockWalletError
-import org.bitcoins.node.networking.peer.DataMessageHandler
-import org.bitcoins.node.SpvNodeCallbacks
-import org.bitcoins.wallet.WalletStorage
 
-object Main
-    extends App
-    // TODO we want to log to user data directory
-    // how do we do this?
-    with BitcoinSLogger {
+import akka.actor.ActorSystem
+import org.bitcoins.chain.config.ChainAppConfig
+import org.bitcoins.db.AppLoggers
+import org.bitcoins.node.{SpvNode, SpvNodeCallbacks}
+import org.bitcoins.node.config.NodeAppConfig
+import org.bitcoins.node.models.Peer
+import org.bitcoins.node.networking.peer.DataMessageHandler
+import org.bitcoins.rpc.client.common.BitcoindRpcClient
+import org.bitcoins.rpc.config.BitcoindInstance
+import org.bitcoins.wallet.{LockedWallet, Wallet, WalletStorage}
+import org.bitcoins.wallet.api._
+import org.bitcoins.wallet.config.WalletAppConfig
+
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
+
+object Main extends App {
   implicit val conf = {
     // val custom = ConfigFactory.parseString("bitcoin-s.network = testnet3")
-    BitcoinSAppConfig()
+    BitcoinSAppConfig.fromDefaultDatadir()
   }
+
+  private val logger = AppLoggers.getHttpLogger(
+    conf.walletConf // doesn't matter which one we pass in
+  )
 
   implicit val walletConf: WalletAppConfig = conf.walletConf
   implicit val nodeConf: NodeAppConfig = conf.nodeConf
@@ -42,11 +34,6 @@ object Main
 
   implicit val system = ActorSystem("bitcoin-s")
   import system.dispatcher
-
-  sys.addShutdownHook {
-    logger.error(s"Exiting process")
-    system.terminate().foreach(_ => logger.info(s"Actor system terminated"))
-  }
 
   /** Log the given message, shut down the actor system and quit. */
   def error(message: Any): Nothing = {
@@ -112,21 +99,30 @@ object Main
 
         SpvNodeCallbacks(onTxReceived = Seq(onTX))
       }
-      val blockheaderDAO = BlockHeaderDAO()
-      val chain = ChainHandler(blockheaderDAO, conf)
-      SpvNode(peer, chain, bloom, callbacks).start()
+      SpvNode(peer, bloom, callbacks).start()
     }
     _ = logger.info(s"Starting SPV node sync")
     _ <- node.sync()
-
+    chainApi <- node.chainApiFromDb()
     start <- {
       val walletRoutes = WalletRoutes(wallet, node)
       val nodeRoutes = NodeRoutes(node)
-      val chainRoutes = ChainRoutes(node.chainApi)
-      val server = Server(Seq(walletRoutes, nodeRoutes, chainRoutes))
+      val chainRoutes = ChainRoutes(chainApi)
+      val server = Server(nodeConf, Seq(walletRoutes, nodeRoutes, chainRoutes))
+
       server.start()
     }
-  } yield start
+  } yield {
+
+    sys.addShutdownHook {
+      logger.error(s"Exiting process")
+
+      node.stop().foreach(_ => logger.info(s"Stopped SPV node"))
+      system.terminate().foreach(_ => logger.info(s"Actor system terminated"))
+    }
+
+    start
+  }
 
   startFut.failed.foreach { err =>
     logger.info(s"Error on server startup!", err)

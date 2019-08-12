@@ -16,8 +16,8 @@ import scala.concurrent.{ExecutionContext, Future}
   * our chain project
   */
 case class BlockHeaderDAO()(
-    implicit override val ec: ExecutionContext,
-    override val appConfig: ChainAppConfig)
+    implicit ec: ExecutionContext,
+    appConfig: ChainAppConfig)
     extends CRUD[BlockHeaderDb, DoubleSha256DigestBE] {
 
   import org.bitcoins.db.DbCommonsColumnMappers._
@@ -57,7 +57,7 @@ case class BlockHeaderDAO()(
     */
   def getAncestorAtHeight(
       child: BlockHeaderDb,
-      height: Long): Future[Option[BlockHeaderDb]] = {
+      height: Int): Future[Option[BlockHeaderDb]] = {
     /*
      * To avoid making many database reads, we make one database read for all
      * possibly useful block headers.
@@ -112,12 +112,12 @@ case class BlockHeaderDAO()(
   }
 
   /** Retrieves a [[BlockHeaderDb]] at the given height */
-  def getAtHeight(height: Long): Future[Vector[BlockHeaderDb]] = {
+  def getAtHeight(height: Int): Future[Vector[BlockHeaderDb]] = {
     val query = getAtHeightQuery(height)
     database.runVec(query)
   }
 
-  def getAtHeightQuery(height: Long): SQLiteProfile.StreamingProfileAction[
+  def getAtHeightQuery(height: Int): SQLiteProfile.StreamingProfileAction[
     Seq[BlockHeaderDb],
     BlockHeaderDb,
     Effect.Read] = {
@@ -125,14 +125,14 @@ case class BlockHeaderDAO()(
   }
 
   /** Gets Block Headers between (inclusive) from and to, could be out of order */
-  def getBetweenHeights(from: Long, to: Long): Future[Vector[BlockHeaderDb]] = {
+  def getBetweenHeights(from: Int, to: Int): Future[Vector[BlockHeaderDb]] = {
     val query = getBetweenHeightsQuery(from, to)
     database.runVec(query)
   }
 
   def getBetweenHeightsQuery(
-      from: Long,
-      to: Long): SQLiteProfile.StreamingProfileAction[
+      from: Int,
+      to: Int): SQLiteProfile.StreamingProfileAction[
     Seq[BlockHeaderDb],
     BlockHeaderDb,
     Effect.Read] = {
@@ -140,17 +140,17 @@ case class BlockHeaderDAO()(
   }
 
   /** Returns the maximum block height from our database */
-  def maxHeight: Future[Long] = {
+  def maxHeight: Future[Int] = {
     val query = maxHeightQuery
     val result = database.run(query)
     result
   }
 
   private def maxHeightQuery: SQLiteProfile.ProfileAction[
-    Long,
+    Int,
     NoStream,
     Effect.Read] = {
-    val query = table.map(_.height).max.getOrElse(0L).result
+    val query = table.map(_.height).max.getOrElse(0).result
     query
   }
 
@@ -174,10 +174,10 @@ case class BlockHeaderDAO()(
 
   /** Returns competing blockchains that are contained in our BlockHeaderDAO
     * Each chain returns the last [[org.bitcoins.core.protocol.blockchain.ChainParams.difficultyChangeInterval difficutly interval]]
-    * as defined by the network we are on. For instance, on bitcoin mainnet this will be 2016 block headers.
-    * If no competing tips are found, we only return one [[Blockchain blockchain]], else we
+    * block headers as defined by the network we are on. For instance, on bitcoin mainnet this will be 2016 block headers.
+    * If no competing tips are found, we only return one [[[org.bitcoins.chain.blockchain.Blockchain Blockchain]], else we
     * return n chains for the number of competing [[chainTips tips]] we have
-    * @see [[Blockchain]]
+    * @see [[org.bitcoins.chain.blockchain.Blockchain Blockchain]]
     * @param ec
     * @return
     */
@@ -192,6 +192,24 @@ case class BlockHeaderDAO()(
         headersF.map(headers => Blockchain.fromHeaders(headers.reverse))
       }
       Future.sequence(nestedFuture)
+    }
+  }
+
+  /** Finds a [[org.bitcoins.chain.models.BlockHeaderDb block header]] that satisfies the given predicate, else returns None */
+  def find(f: BlockHeaderDb => Boolean)(
+      implicit ec: ExecutionContext): Future[Option[BlockHeaderDb]] = {
+    val chainsF = getBlockchains()
+    chainsF.map { chains =>
+      val headersOpt: Vector[Option[BlockHeaderDb]] =
+        chains.map(_.headers.find(f))
+      //if there are multiple, we just choose the first one for now
+      val result = headersOpt.filter(_.isDefined).flatten
+      if (result.length > 1) {
+        logger.warn(
+          s"Discarding other matching headers for predicate headers=${result
+            .map(_.hashBE.hex)}")
+      }
+      result.headOption
     }
   }
 }
