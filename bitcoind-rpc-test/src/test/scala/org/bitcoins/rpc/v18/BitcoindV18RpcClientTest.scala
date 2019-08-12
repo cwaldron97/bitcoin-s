@@ -16,7 +16,7 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
     clientIsStartedF.map(_ => client)
   }
 
-  clientF.map(c => clientAccum.+=(c))
+  clientF.foreach(c => clientAccum.+=(c))
 
   behavior of "BitcoindV18RpcClient"
 
@@ -29,9 +29,10 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
   }
 
   it should "return active rpc commands" in {
-    clientF.map(client =>
+    val generatedF = clientF.flatMap(client =>
       client.getNewAddress.flatMap(client.generateToAddress(50000, _)))
-    val rpcinfoF = clientF.flatMap(client => client.getRpcInfo())
+    val rpcinfoF =
+      generatedF.flatMap(clientF.flatMap(client => client.getRpcInfo()))
 
     rpcinfoF.map { result =>
       assert(result.active_commands.length == 2)

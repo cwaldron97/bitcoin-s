@@ -17,7 +17,7 @@ class PsbtRpcTest extends BitcoindRpcTest {
   clientF.map(c => clientAccum.+=(c))
 
   behavior of "PsbtRpc"
-  "temp comment for git test"
+
   it should "return something" in {
     clientF.flatMap { client =>
       val resultF = client.analyzePsbt(
