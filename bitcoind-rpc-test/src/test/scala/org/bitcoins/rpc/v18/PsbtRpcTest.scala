@@ -36,16 +36,16 @@ class PsbtRpcTest extends BitcoindRpcTest {
     val analyzedF = clientF.flatMap(client => client.analyzePsbt(psbt))
 
     analyzedF.map { result =>
-      assert(result.inputs.exists(_.next.nonEmpty))
+      assert(result.inputs.exists(_.next.isDefined))
       assert(result.inputs.exists(_.missing.head.pubkeys.head.nonEmpty))
       assert(result.inputs.exists(_.missing.head.signatures.head.nonEmpty))
-      assert(result.inputs.exists(_.missing.head.redeemscript.nonEmpty))
-      assert(result.inputs.exists(_.missing.head.witnessscript.nonEmpty))
+      assert(result.inputs.exists(_.missing.head.redeemscript.isDefined))
+      assert(result.inputs.exists(_.missing.head.witnessscript.isDefined))
       assert(result.inputs.exists(_.is_final))
       assert(result.inputs.exists(_.has_utxo))
-      assert(result.estimated_feerate.nonEmpty)
-      assert(result.estimated_vsize.nonEmpty)
-      assert(result.fee.nonEmpty)
+      assert(result.estimated_feerate.isDefined)
+      assert(result.estimated_vsize.isDefined)
+      assert(result.fee.isDefined)
       assert(result.next.nonEmpty)
     }
   }

@@ -369,16 +369,17 @@ object JsonSerializers {
   implicit val analyzePsbtResultReads: Reads[AnalyzePsbtResult] =
     Json.reads[AnalyzePsbtResult]
 
-  implicit val getNodeAddressesReads: Reads[GetNodeAddressesResult] = { js =>
-    for {
-      time <- js.validate[Long].map(_.seconds)
-      services <- js.validate[Int]
-      address <- js.validate[URI]
-      port <- js.validate[Int]
-    } yield GetNodeAddressesResult(time, services, address, port)
-  }
+  implicit val getNodeAddressesReads: Reads[GetNodeAddressesResult] =
+    Reads[GetNodeAddressesResult] { js =>
+      for {
+        time <- js.validate[Long].map(_.seconds)
+        services <- js.validate[Int]
+        address <- js.validate[URI]
+        port <- js.validate[Int]
+      } yield GetNodeAddressesResult(time, services, address, port)
+    }
 
-  implicit val RpcCommandsReads: Reads[RpcCommands] = { js =>
+  implicit val RpcCommandsReads: Reads[RpcCommands] = Reads[RpcCommands] { js =>
     for {
       method <- js.validate[String]
       duration <- js
