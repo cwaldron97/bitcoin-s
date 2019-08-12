@@ -4,14 +4,17 @@ import akka.actor.ActorRef
 import akka.io.Tcp
 import org.bitcoins.core.crypto.DoubleSha256Digest
 import org.bitcoins.core.p2p.NetworkMessage
-import org.bitcoins.core.util.BitcoinSLogger
 import org.bitcoins.core.p2p._
 import org.bitcoins.node.networking.P2PClient
 import org.bitcoins.node.config.NodeAppConfig
 import org.bitcoins.core.protocol.transaction.Transaction
+import org.bitcoins.db.P2PLogger
+import org.bitcoins.core.crypto.HashDigest
+import org.bitcoins.core.bloom.BloomFilter
+import org.bitcoins.core.protocol.blockchain.BlockHeader
 
 case class PeerMessageSender(client: P2PClient)(implicit conf: NodeAppConfig)
-    extends BitcoinSLogger {
+    extends P2PLogger {
   private val socket = client.peer.socket
 
   /** Initiates a connection with the given peer */
@@ -26,7 +29,7 @@ case class PeerMessageSender(client: P2PClient)(implicit conf: NodeAppConfig)
     (client.actor ! Tcp.Close)
   }
 
-  /** Sends a [[org.bitcoins.node.messages.VersionMessage VersionMessage]] to our peer */
+  /** Sends a [[org.bitcoins.core.p2p.VersionMessage VersionMessage]] to our peer */
   def sendVersionMessage(): Unit = {
     val versionMsg = VersionMessage(client.peer.socket, conf.network)
     logger.trace(s"Sending versionMsg=$versionMsg to peer=${client.peer}")
@@ -67,9 +70,35 @@ case class PeerMessageSender(client: P2PClient)(implicit conf: NodeAppConfig)
     sendMsg(message)
   }
 
+  def sendFilterClearMessage(): Unit = {
+    sendMsg(FilterClearMessage)
+  }
+
+  def sendFilterAddMessage(hash: HashDigest): Unit = {
+    val message = FilterAddMessage.fromHash(hash)
+    logger.trace(s"Sending filteradd=$message to peer=${client.peer}")
+    sendMsg(message)
+  }
+
+  def sendFilterLoadMessage(bloom: BloomFilter): Unit = {
+    val message = FilterLoadMessage(bloom)
+    logger.trace(s"Sending filterload=$message to peer=${client.peer}")
+    sendMsg(message)
+  }
+
   def sendTransactionMessage(transaction: Transaction): Unit = {
     val message = TransactionMessage(transaction)
     logger.trace(s"Sending txmessage=$message to peer=${client.peer}")
+    sendMsg(message)
+  }
+
+  /** Sends a request for filtered blocks matching the given headers */
+  def sendGetDataMessage(headers: BlockHeader*): Unit = {
+    val inventories =
+      headers.map(header =>
+        Inventory(TypeIdentifier.MsgFilteredBlock, header.hash))
+    val message = GetDataMessage(inventories)
+    logger.info(s"Sending getdata=$message to peer=${client.peer}")
     sendMsg(message)
   }
 

@@ -14,9 +14,11 @@ import org.bitcoins.rpc.util.AsyncUtil
 import org.bitcoins.rpc.BitcoindException
 import org.bitcoins.core.protocol.transaction.Transaction
 import org.scalactic.Bool
+
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import org.bitcoins.testkit.async.TestAsyncUtil
+import org.bitcoins.testkit.wallet.BitcoinSWalletTest.WalletWithBitcoind
 
 class BroadcastTransactionTest extends BitcoinSWalletTest {
 
@@ -56,16 +58,10 @@ class BroadcastTransactionTest extends BitcoinSWalletTest {
 
       address <- rpc.getNewAddress
       bloom <- wallet.getBloomFilter()
-
       spv <- {
         val peer = Peer.fromBitcoind(rpc.instance)
-        val chainHandler = {
-          val bhDao = BlockHeaderDAO()
-          ChainHandler(bhDao, config)
-        }
 
-        val spv =
-          SpvNode(peer, chainHandler, bloomFilter = bloom)
+        val spv = SpvNode(peer, bloomFilter = bloom)
         spv.start()
       }
       _ <- spv.sync()

@@ -8,6 +8,7 @@ import org.bitcoins.wallet.api.UnlockWalletSuccess
 import org.bitcoins.core.util.FutureUtil
 import org.bitcoins.core.currency._
 import org.bitcoins.testkit.Implicits._
+import org.bitcoins.testkit.wallet.BitcoinSWalletTest.WalletWithBitcoind
 
 class WalletBloomTest extends BitcoinSWalletTest {
   behavior of "Wallet bloom filter"
@@ -15,7 +16,7 @@ class WalletBloomTest extends BitcoinSWalletTest {
   override type FixtureParam = WalletWithBitcoind
 
   override def withFixture(test: OneArgAsyncTest): FutureOutcome =
-    withNewWalletAndBitcoind(test)
+    withFundedWalletAndBitcoind(test)
 
   it should "generate a bloom filter that matches the pubkeys in our wallet" in {
     param =>
@@ -32,19 +33,12 @@ class WalletBloomTest extends BitcoinSWalletTest {
       }
   }
 
-  // TODO: change fixture to withFundedWalletAndBitcoind once #577 goes in
-  // https://github.com/bitcoin-s/bitcoin-s/pull/577/files#diff-0fb6ac004fe1e550b7c13258d7d0706cR154
   it should "generate a bloom filter that matches the outpoints in our wallet" in {
     param =>
       val WalletWithBitcoind(walletApi, bitcoind) = param
       val wallet = walletApi.asInstanceOf[Wallet]
 
       for {
-        address <- wallet.getNewAddress()
-        tx <- bitcoind
-          .sendToAddress(address, 5.bitcoins)
-          .flatMap(bitcoind.getRawTransaction(_))
-        _ <- wallet.processTransaction(tx.hex, confirmations = 0)
         outpoints <- wallet.listOutpoints()
 
         bloom <- wallet.getBloomFilter()

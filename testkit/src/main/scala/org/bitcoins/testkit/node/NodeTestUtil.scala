@@ -19,7 +19,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import akka.actor.ActorSystem
 import org.bitcoins.core.util.BitcoinSLogger
-import org.bitcoins.rpc.util.AsyncUtil
+import org.bitcoins.testkit.async.TestAsyncUtil
 import org.bitcoins.core.bloom.BloomFilter
 import org.bitcoins.core.bloom.BloomUpdateAll
 
@@ -96,7 +96,7 @@ abstract class NodeTestUtil extends BitcoinSLogger {
     new InetSocketAddress(instance.uri.getHost, instance.p2pPort)
   }
 
-  /** Gets the [[Peer]] that
+  /** Gets the [[org.bitcoins.node.models.Peer]] that
     * corresponds to [[org.bitcoins.rpc.client.common.BitcoindRpcClient]] */
   def getBitcoindPeer(bitcoindRpcClient: BitcoindRpcClient): Peer = {
     val socket = getBitcoindSocketAddress(bitcoindRpcClient)
@@ -107,21 +107,38 @@ abstract class NodeTestUtil extends BitcoinSLogger {
   def isSameBestHash(node: SpvNode, rpc: BitcoindRpcClient)(
       implicit ec: ExecutionContext): Future[Boolean] = {
     val hashF = rpc.getBestBlockHash
-    val spvHashF = node.chainApi.getBestBlockHash
     for {
-      spvBestHash <- spvHashF
+      chainApi <- node.chainApiFromDb()
+      spvBestHash <- chainApi.getBestBlockHash
       hash <- hashF
     } yield {
       spvBestHash == hash
     }
   }
 
-  /** Awaits sync between the given SPV node and bitcoind client */
+  /** Checks if the given light client and bitcoind
+    * has the same number of blocks in their blockchains
+    */
+  def isSameBlockCount(spv: SpvNode, rpc: BitcoindRpcClient)(
+      implicit ec: ExecutionContext): Future[Boolean] = {
+    val rpcCountF = rpc.getBlockCount
+    for {
+      spvCount <- spv.chainApiFromDb().flatMap(_.getBlockCount)
+      rpcCount <- rpcCountF
+    } yield rpcCount == spvCount
+  }
+
+  /** Awaits sync between the given SPV node and bitcoind client
+    *
+    * TODO: We should check for hash, not block height. however,
+    * our way of determining what the best hash is when having
+    * multiple tips is not good enough yet
+    */
   def awaitSync(node: SpvNode, rpc: BitcoindRpcClient)(
       implicit sys: ActorSystem): Future[Unit] = {
     import sys.dispatcher
-    AsyncUtil
-      .retryUntilSatisfiedF(() => isSameBestHash(node, rpc), 500.milliseconds)
+    TestAsyncUtil
+      .retryUntilSatisfiedF(() => isSameBlockCount(node, rpc), 500.milliseconds)
   }
 
 }
