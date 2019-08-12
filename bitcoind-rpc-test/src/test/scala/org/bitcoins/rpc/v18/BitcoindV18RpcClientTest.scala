@@ -32,7 +32,7 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
     val generatedF = clientF.flatMap(client =>
       client.getNewAddress.flatMap(client.generateToAddress(50000, _)))
     val rpcinfoF =
-      generatedF.flatMap(clientF.flatMap(client => client.getRpcInfo()))
+      generatedF.flatMap(_ => clientF.flatMap(client => client.getRpcInfo()))
 
     rpcinfoF.map { result =>
       assert(result.active_commands.length == 2)
