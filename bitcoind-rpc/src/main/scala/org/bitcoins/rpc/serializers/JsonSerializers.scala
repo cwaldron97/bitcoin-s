@@ -382,9 +382,7 @@ object JsonSerializers {
   implicit val RpcCommandsReads: Reads[RpcCommands] = Reads[RpcCommands] { js =>
     for {
       method <- js.validate[String]
-      duration <- js
-        .validate[Long]
-        .map(_.microseconds)
+      duration <- js.validate[Long].map(_.microseconds)
     } yield RpcCommands(method, duration)
   }
 
