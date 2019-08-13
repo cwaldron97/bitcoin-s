@@ -386,6 +386,9 @@ object JsonSerializers {
     } yield RpcCommands(method, duration)
   }
 
+  implicit val GetRpcInfoResultReads: Reads[GetRpcInfoResult] =
+    Json.reads[GetRpcInfoResult]
+
   implicit val satsPerKbReads: Reads[SatoshisPerKiloByte] =
     new Reads[SatoshisPerKiloByte] {
 
@@ -393,9 +396,6 @@ object JsonSerializers {
         SerializerUtil.processJsNumber(num =>
           SatoshisPerKiloByte(Satoshis(Int64(num.toBigInt()))))(json)
     }
-
-  implicit val GetRpcInfoResultReads: Reads[GetRpcInfoResult] =
-    Json.reads[GetRpcInfoResult]
 
   implicit val arrayOfWalletsInputReads: Reads[ArrayOfWalletsInput] =
     Json.reads[ArrayOfWalletsInput]
