@@ -30,7 +30,7 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
 
   it should "return active rpc commands" in {
     val generatedF = clientF.flatMap(client =>
-      client.getNewAddress.flatMap(client.generateToAddress(50000, _)))
+      client.getNewAddress.flatMap(addr => client.generateToAddress(100, addr)))
     val rpcinfoF =
       generatedF.flatMap(_ => clientF.flatMap(client => client.getRpcInfo()))
 
@@ -60,7 +60,7 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
 
     descriptorF.map { result =>
       assert(result.hasprivatekey.equals(false))
-      assert(result.isrange.equals(true))
+      assert(result.isrange.equals(false))
       assert(result.issolvable.equals(true))
     }
   }
