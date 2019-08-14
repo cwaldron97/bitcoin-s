@@ -6,6 +6,9 @@ import org.bitcoins.testkit.util.BitcoindRpcTest
 
 import scala.concurrent.Future
 
+/**Tests for PSBT for RPC calls specific to V18 new PSBT calls
+  *@see https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki#Examples
+  */
 class PsbtRpcTest extends BitcoindRpcTest {
 
   lazy val clientF: Future[BitcoindV18RpcClient] = {
@@ -30,9 +33,10 @@ class PsbtRpcTest extends BitcoindRpcTest {
     }
   }
   it should "analyze a PSBT and return a non-empty result" in {
+    //psbt that has inputs and outputs but without an unsigned tx
 
     val psbt =
-      "cHNidP8BACoCAAAAAAFAQg8AAAAAABepFG6Rty1Vk+fUOR4v9E6R6YXDFkHwhwAAAAAAAA=="
+      "cHNidP8AAQD9pQEBAAAAAAECiaPHHqtNIOA3G7ukzGmPopXJRjr6Ljl/hTPMti+VZ+UBAAAAFxYAFL4Y0VKpsBIDna89p95PUzSe7LmF/////4b4qkOnHf8USIk6UwpyN+9rRgi7st0tAXHmOuxqSJC0AQAAABcWABT+Pp7xp0XpdNkCxDVZQ6vLNL1TU/////8CAMLrCwAAAAAZdqkUhc/xCX/Z4Ai7NK9wnGIZeziXikiIrHL++E4sAAAAF6kUM5cluiHv1irHU6m80GfWx6ajnQWHAkcwRAIgJxK+IuAnDzlPVoMR3HyppolwuAJf3TskAinwf4pfOiQCIAGLONfc0xTnNMkna9b7QPZzMlvEuqFEyADS8vAtsnZcASED0uFWdJQbrUqZY3LLh+GFbTZSYG2YVi/jnF6efkE/IQUCSDBFAiEA0SuFLYXc2WHS9fSrZgZU327tzHlMDDPOXMMJ/7X85Y0CIGczio4OFyXBl/saiK9Z9R5E5CVbIBZ8hoQDHAXR8lkqASECI7cr7vCWXRC+B3jv7NYfysb3mk6haTkzgHNEZPhPKrMAAAAAAA=="
     val analyzedF = clientF.flatMap(client => client.analyzePsbt(psbt))
 
     analyzedF.map { result =>
@@ -42,7 +46,7 @@ class PsbtRpcTest extends BitcoindRpcTest {
       assert(result.inputs.exists(_.missing.head.redeemscript.isDefined))
       assert(result.inputs.exists(_.missing.head.witnessscript.isDefined))
       assert(result.inputs.exists(_.is_final))
-      assert(result.inputs.exists(_.has_utxo))
+      assert(result.inputs.exists(_.has_utxo == false))
       assert(result.estimated_feerate.isDefined)
       assert(result.estimated_vsize.isDefined)
       assert(result.fee.isDefined)
@@ -51,7 +55,7 @@ class PsbtRpcTest extends BitcoindRpcTest {
   }
   it should "correctly analyze a psbt " in {
     val psbt =
-      "cHNidP8BACoCAAAAAAFAQg8AAAAAABepFG6Rty1Vk+fUOR4v9E6R6YXDFkHwhwAAAAAAAA=="
+      "cHNidP8AAQD9pQEBAAAAAAECiaPHHqtNIOA3G7ukzGmPopXJRjr6Ljl/hTPMti+VZ+UBAAAAFxYAFL4Y0VKpsBIDna89p95PUzSe7LmF/////4b4qkOnHf8USIk6UwpyN+9rRgi7st0tAXHmOuxqSJC0AQAAABcWABT+Pp7xp0XpdNkCxDVZQ6vLNL1TU/////8CAMLrCwAAAAAZdqkUhc/xCX/Z4Ai7NK9wnGIZeziXikiIrHL++E4sAAAAF6kUM5cluiHv1irHU6m80GfWx6ajnQWHAkcwRAIgJxK+IuAnDzlPVoMR3HyppolwuAJf3TskAinwf4pfOiQCIAGLONfc0xTnNMkna9b7QPZzMlvEuqFEyADS8vAtsnZcASED0uFWdJQbrUqZY3LLh+GFbTZSYG2YVi/jnF6efkE/IQUCSDBFAiEA0SuFLYXc2WHS9fSrZgZU327tzHlMDDPOXMMJ/7X85Y0CIGczio4OFyXBl/saiK9Z9R5E5CVbIBZ8hoQDHAXR8lkqASECI7cr7vCWXRC+B3jv7NYfysb3mk6haTkzgHNEZPhPKrMAAAAAAA=="
     val analyzedF = clientF.flatMap(client => client.analyzePsbt(psbt))
     val expectedfee = Bitcoins(0.00001)
     val expectedfeerate = 0.0000005
