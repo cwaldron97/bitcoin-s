@@ -40,6 +40,8 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
   }
 
   it should "return a list of wallets" in {
+    val walletname = "190cwaldron9712jvkaqildkopqakdlf"
+    clientF.flatMap(client => client.generate(500))
     val listF = clientF.flatMap(client => client.listWalletDir())
 
     listF.map { result =>
