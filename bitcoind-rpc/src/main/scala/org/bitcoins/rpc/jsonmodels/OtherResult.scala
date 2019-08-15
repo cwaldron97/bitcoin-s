@@ -166,7 +166,7 @@ final case class GetDescriptorInfoResult(
     descriptor: String,
     isrange: Boolean,
     issolvable: Boolean,
-    hasprivatekey: Boolean
+    hasprivatekeys: Boolean
 ) extends OtherResult
 
 final case class SubmitHeaderResult(header: BlockHeader) extends OtherResult

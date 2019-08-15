@@ -59,9 +59,9 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
       clientF.flatMap(client => client.getDescriptorInfo(descriptor))
 
     descriptorF.map { result =>
-      assert(result.hasprivatekey.==(false))
       assert(result.isrange.==(false))
       assert(result.issolvable.==(true))
+      assert(result.hasprivatekeys.==(false))
     }
   }
 
