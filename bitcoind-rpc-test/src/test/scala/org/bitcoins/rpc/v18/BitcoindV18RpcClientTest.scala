@@ -35,7 +35,7 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
       generatedF.flatMap(_ => clientF.flatMap(client => client.getRpcInfo()))
 
     rpcinfoF.map { result =>
-      assert(result.active_commands.length == 2)
+      assert(result.active_commands.length == 1)
     }
   }
 
