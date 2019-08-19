@@ -43,7 +43,7 @@ class PsbtRpcTest extends BitcoindRpcTest {
     analyzedF.map { result =>
       assert(result.inputs.exists(_.next.isDefined))
       assert(result.inputs.exists(_.missing.head.pubkeys.head.nonEmpty))
-      assert(result.inputs.exists(_.missing.head.signatures.head.nonEmpty))
+      assert(result.inputs.exists(_.missing.head.signatures.isEmpty))
       assert(result.inputs.exists(_.missing.head.redeemscript.isDefined))
       assert(result.inputs.exists(_.missing.head.witnessscript.isDefined))
       assert(result.inputs.exists(_.is_final))
@@ -57,7 +57,7 @@ class PsbtRpcTest extends BitcoindRpcTest {
     val psbt =
       "cHNidP8BAKACAAAAAqsJSaCMWvfEm4IS9Bfi8Vqz9cM9zxU4IagTn4d6W3vkAAAAAAD+////qwlJoIxa98SbghL0F+LxWrP1wz3PFTghqBOfh3pbe+QBAAAAAP7///8CYDvqCwAAAAAZdqkUdopAu9dAy+gdmI5x3ipNXHE5ax2IrI4kAAAAAAAAGXapFG9GILVT+glechue4O/p+gOcykWXiKwAAAAAAAEA3wIAAAABJoFxNx7f8oXpN63upLN7eAAMBWbLs61kZBcTykIXG/YAAAAAakcwRAIgcLIkUSPmv0dNYMW1DAQ9TGkaXSQ18Jo0p2YqncJReQoCIAEynKnazygL3zB0DsA5BCJCLIHLRYOUV663b8Eu3ZWzASECZX0RjTNXuOD0ws1G23s59tnDjZpwq8ubLeXcjb/kzjH+////AtPf9QUAAAAAGXapFNDFmQPFusKGh2DpD9UhpGZap2UgiKwA4fUFAAAAABepFDVF5uM7gyxHBQ8k0+65PJwDlIvHh7MuEwAAAQEgAOH1BQAAAAAXqRQ1RebjO4MsRwUPJNPuuTycA5SLx4cBBBYAFIXRNTfy4mVAWjTbr6nj3aAfuCMIACICAurVlmh8qAYEPtw94RbN8p1eklfBls0FXPaYyNAr8k6ZELSmumcAAACAAAAAgAIAAIAAIgIDlPYr6d8ZlSxVh3aK63aYBhrSxKJciU9H2MFitNchPQUQtKa6ZwAAAIABAACAAgAAgAA="
     val analyzedF = clientF.flatMap(client => client.analyzePsbt(psbt))
-    val expectedfee = Bitcoins(0.00001)
+    val expectedfee = Bitcoins(0.00090341)
     val expectedfeerate = 0.0000005
     val expectedestimatedvsize = 10
     val expectedhasutxo = false
