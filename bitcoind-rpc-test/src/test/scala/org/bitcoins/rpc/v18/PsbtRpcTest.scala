@@ -46,7 +46,7 @@ class PsbtRpcTest extends BitcoindRpcTest {
       assert(result.inputs.exists(_.missing.head.signatures.isEmpty))
       assert(result.inputs.exists(_.missing.head.redeemscript.isEmpty))
       assert(result.inputs.exists(_.missing.head.witnessscript.isEmpty))
-      assert(result.inputs.exists(_.is_final))
+      assert(result.inputs.exists(_.is_final) == false)
       assert(result.estimated_feerate.isDefined)
       assert(result.estimated_vsize.isDefined)
       assert(result.fee.isDefined)
@@ -59,7 +59,6 @@ class PsbtRpcTest extends BitcoindRpcTest {
     val analyzedF = clientF.flatMap(client => client.analyzePsbt(psbt))
     val expectedfee = Bitcoins(0.00090341)
     val expectedfeerate = 0.0000005
-    val expectedestimatedvsize = 10
     val expectedhasutxo = true
     val expectedisfinal = false
     val expectedrole = "updater"
@@ -70,7 +69,7 @@ class PsbtRpcTest extends BitcoindRpcTest {
 
       assert(result.inputs.head.is_final == expectedisfinal)
 
-      assert(result.estimated_vsize.get == expectedestimatedvsize)
+      assert(result.estimated_vsize.isEmpty)
 
       assert(result.estimated_feerate.get == expectedfeerate)
 
