@@ -2,6 +2,7 @@ package org.bitcoins.rpc.v18
 import org.bitcoins.chain.models.BlockHeaderDbHelper
 import org.bitcoins.core.protocol.blockchain.RegTestNetChainParams
 import org.bitcoins.rpc.client.common.BitcoindVersion
+import org.bitcoins.rpc.client.common.RpcOpts.AddNodeArgument
 import org.bitcoins.rpc.client.v18.BitcoindV18RpcClient
 import org.bitcoins.testkit.chain.BlockHeaderHelper
 import org.bitcoins.testkit.rpc.BitcoindRpcTestUtil
@@ -76,12 +77,14 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
   }
 
   it should "get node addresses given a count" in {
-    val nodeF = clientF.flatMap(client => client.getNodeAddresses(3))
+    val addedF =
+      clientF.flatMap(client =>
+        client.addNode(client.getDaemon.uri, AddNodeArgument.OneTry))
+    val nodeF = clientF.flatMap(client => client.getNodeAddresses(1))
 
     nodeF.map({ result =>
       assert(result.head.address.isAbsolute)
-      assert(result.head.services >= 0)
-      assert(result.nonEmpty)
+      assert(result.head.services == 1)
     })
   }
 
