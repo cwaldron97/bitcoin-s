@@ -231,4 +231,9 @@ final case class ListWalletDirResult(
 
 final case class ArrayOfWalletsInput(
     name: String
+) extends WalletResult
 
+final case class CreateWalletResult(
+    name: String,
+    warning: String
+) extends WalletResult
