@@ -2,7 +2,6 @@ package org.bitcoins.node.networking
 
 import akka.actor.{Actor, ActorRef, ActorRefFactory, Props}
 import akka.io.{IO, Tcp}
-import akka.pattern.AskTimeoutException
 import akka.util.{ByteString, CompactByteString, Timeout}
 import org.bitcoins.core.config.NetworkParameters
 import org.bitcoins.core.p2p.NetworkMessage
@@ -17,7 +16,7 @@ import org.bitcoins.node.config.NodeAppConfig
 
 import scala.annotation.tailrec
 import scala.util._
-import org.bitcoins.db.P2PLogger
+import org.bitcoins.node.P2PLogger
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.DurationInt
@@ -92,7 +91,6 @@ case class P2PClientActor(
         Await.result(handleTcpMessage(message, Some(peer), unalignedBytes),
                      timeout)
       context.become(awaitNetworkRequest(peer, newUnalignedBytes))
-
     case metaMsg: P2PClient.MetaMsg =>
       sender ! handleMetaMsg(metaMsg)
   }
@@ -105,7 +103,7 @@ case class P2PClientActor(
       //after receiving Tcp.Connected we switch to the
       //'awaitNetworkRequest' context. This is the main
       //execution loop for the Client actor
-      handleCommand(cmd, peer = None)
+      handleCommand(cmd, peerOpt = None)
 
     case connected: Tcp.Connected =>
       Await.result(handleEvent(connected, unalignedBytes = ByteVector.empty),
@@ -246,10 +244,18 @@ case class P2PClientActor(
     */
   private def handleCommand(
       command: Tcp.Command,
-      peer: Option[ActorRef]): Unit =
+      peerOpt: Option[ActorRef]): Unit =
     command match {
       case closeCmd @ (Tcp.ConfirmedClose | Tcp.Close | Tcp.Abort) =>
-        peer.map(p => p ! closeCmd)
+        peerOpt match {
+          case Some(peer) => peer ! closeCmd
+          case None =>
+            logger.error(
+              s"Failing to disconnect node because we do not have peer defined!")
+            val newPeerMsgHandlerRecvF = currentPeerMsgHandlerRecv.disconnect()
+            currentPeerMsgHandlerRecv =
+              Await.result(newPeerMsgHandlerRecvF, timeout)
+        }
         ()
       case connectCmd: Tcp.Connect =>
         manager ! connectCmd

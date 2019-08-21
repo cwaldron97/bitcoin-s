@@ -231,4 +231,4 @@ final case class ListWalletDirResult(
 
 final case class ArrayOfWalletsInput(
     name: String
-) extends WalletResult
+
