@@ -41,15 +41,12 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
   }
 
   it should "return a list of wallets" in {
-    val walletname = "190cwaldron9712jvkaqildkopqakdlf"
-    clientF.flatMap(client => client.generate(500))
+    clientF.flatMap(client => client.createWallet("suredbits"))
     val listF = clientF.flatMap(client => client.listWalletDir())
 
     listF.map { result =>
       assert(result.wallets.nonEmpty)
-      //asserting that the wallet name is correct based on the minimum and maximum characters allowed for a wallet
-      assert(
-        result.wallets.head.name.length >= 25 && result.wallets.head.name.length <= 34)
+      assert(result.wallets.exists(_ == "suredbits"))
     }
   }
 

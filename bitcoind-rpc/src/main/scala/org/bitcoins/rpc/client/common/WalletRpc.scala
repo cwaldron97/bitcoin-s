@@ -184,4 +184,12 @@ trait WalletRpc { self: Client =>
       "walletpassphrasechange",
       List(JsString(currentPassphrase), JsString(newPassphrase)))
   }
+
+  def createWallet(
+      walletName: String,
+      disablePrivateKeys: Boolean = false): Future[CreateWalletResult] = {
+    bitcoindCall[CreateWalletResult](
+      "createwallet",
+      List(JsString(walletName), Json.toJson(disablePrivateKeys)))
+  }
 }

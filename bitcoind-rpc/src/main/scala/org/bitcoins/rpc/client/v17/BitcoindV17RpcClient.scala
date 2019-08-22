@@ -93,14 +93,6 @@ class BitcoindV17RpcClient(override val instance: BitcoindInstance)(
       List(JsArray(Vector(Json.toJson(transaction))), JsBoolean(allowHighFees)))
       .map(_.head)
   }
-
-  def createWallet(
-      walletName: String,
-      disablePrivateKeys: Boolean = false): Future[CreateWalletResult] = {
-    bitcoindCall[CreateWalletResult](
-      "createwallet",
-      List(JsString(walletName), Json.toJson(disablePrivateKeys)))
-  }
 }
 
 object BitcoindV17RpcClient {
