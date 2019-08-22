@@ -56,7 +56,7 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
       create <- client.createWallet("Suredbits")
       list <- client.listWalletDir()
     } yield {
-      assert(list.wallets.tail.exists(_ == "Suredbits"))
+      assert(list.wallets.last.name.contains("Suredbits"))
     }
   }
 
