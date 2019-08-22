@@ -192,4 +192,9 @@ trait WalletRpc { self: Client =>
       "createwallet",
       List(JsString(walletName), Json.toJson(disablePrivateKeys)))
   }
+
+  def getAddressInfo(address: BitcoinAddress): Future[AddressInfoResult] = {
+    bitcoindCall[AddressInfoResult]("getaddressinfo",
+                                    List(JsString(address.value)))
+  }
 }

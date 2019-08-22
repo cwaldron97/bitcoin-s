@@ -610,6 +610,11 @@ trait BitcoindRpcTestUtil extends BitcoinSLogger {
     (BitcoindV17RpcClient, BitcoindV17RpcClient)] =
     createNodePairInternal(BitcoindVersion.V17, clientAccum)
 
+  def createNodePairV18(clientAccum: RpcClientAccum = Vector.newBuilder)(
+      implicit system: ActorSystem): Future[
+    (BitcoindV18RpcClient, BitcoindV18RpcClient)] =
+    createNodePairInternal(BitcoindVersion.V18, clientAccum)
+
   /**
     * Returns a triple of [[org.bitcoins.rpc.client.common.BitcoindRpcClient BitcoindRpcClient]]
     * that are connected with some blocks in the chain
@@ -702,6 +707,8 @@ trait BitcoindRpcTestUtil extends BitcoinSLogger {
       utxoDeps: Vector[RpcOpts.SignRawTransactionOutputParameter] = Vector.empty
   )(implicit actorSystemw: ActorSystem): Future[SignRawTransactionResult] =
     signer match {
+      case v18: BitcoindV18RpcClient =>
+        v18.signRawTransactionWithWallet(transaction, utxoDeps)
       case v17: BitcoindV17RpcClient =>
         v17.signRawTransactionWithWallet(transaction, utxoDeps)
       case v16: BitcoindV16RpcClient =>
@@ -709,17 +716,29 @@ trait BitcoindRpcTestUtil extends BitcoinSLogger {
       case unknown: BitcoindRpcClient =>
         val v16T = BitcoindV16RpcClient.fromUnknownVersion(unknown)
         val v17T = BitcoindV17RpcClient.fromUnknownVersion(unknown)
-        (v16T, v17T) match {
-          case (Failure(_), Failure(_)) =>
+        val v18T = BitcoindV18RpcClient.fromUnknownVersion(unknown)
+        (v16T, v17T, v18T) match {
+          case (Failure(_), Failure(_), Failure(_)) =>
             throw new RuntimeException(
               "Could not figure out version of provided bitcoind RPC client!")
-          case (Success(_), Success(_)) =>
+          case (Success(_), Success(_), Success(_)) =>
             throw new RuntimeException(
               "This should not happen, managed to construct different versioned RPC clients from one single client")
-          case (Success(v16), Failure(_)) =>
+          case (Success(_), Success(_), Failure(_)) =>
+            throw new RuntimeException(
+              "This should not happen, managed to construct different versioned RPC clients from one single client")
+          case (Success(_), Failure(_), Success(_)) =>
+            throw new RuntimeException(
+              "This should not happen, managed to construct different versioned RPC clients from one single client")
+          case (Failure(_), Success(_), Success(_)) =>
+            throw new RuntimeException(
+              "This should not happen, managed to construct different versioned RPC clients from one single client")
+          case (Success(v16), Failure(_), Failure(_)) =>
             v16.signRawTransaction(transaction, utxoDeps)
-          case (Failure(_), Success(v17)) =>
+          case (Failure(_), Success(v17), Failure(_)) =>
             v17.signRawTransactionWithWallet(transaction, utxoDeps)
+          case (Failure(_), Failure(_), Success(v18)) =>
+            v18.signRawTransactionWithWallet(transaction, utxoDeps)
         }
     }
 
@@ -732,6 +751,8 @@ trait BitcoindRpcTestUtil extends BitcoinSLogger {
     import system.dispatcher
 
     client match {
+      case v18: BitcoindV18RpcClient =>
+        v18.getAddressInfo(address).map(_.pubkey)
       case v17: BitcoindV17RpcClient =>
         v17.getAddressInfo(address).map(_.pubkey)
       case v16: BitcoindV16RpcClient =>
@@ -740,6 +761,9 @@ trait BitcoindRpcTestUtil extends BitcoinSLogger {
         if (other.instance.getVersion == BitcoindVersion.V17) {
           val v17 = new BitcoindV17RpcClient(other.instance)
           v17.getAddressInfo(address).map(_.pubkey)
+        } else if (other.instance.getVersion == BitcoindVersion.V18) {
+          val v18 = new BitcoindV18RpcClient(other.instance)
+          v18.getAddressInfo(address).map(_.pubkey)
         } else {
           other.validateAddress(address).map(_.pubkey)
         }
