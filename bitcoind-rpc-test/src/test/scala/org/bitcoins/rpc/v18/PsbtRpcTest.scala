@@ -99,7 +99,8 @@ class PsbtRpcTest extends BitcoindRpcTest {
     val joinedF = clientF.flatMap(client => client.joinPsbts(seqofpsbts))
 
     joinedF.map { result =>
-      assert(result.contains("cHNidP8BAP0LAQIAAAADJoFxNx7f8oXpN63upLN7eAAMBWbLs61kZBcTykIXG/YAAAAAAP7")
+      assert(result.contains(
+        "cHNidP8BAP0LAQIAAAADJoFxNx7f8oXpN63upLN7eAAMBWbLs61kZBcTykIXG/YAAAAAAP7"))
     }
   }
 
