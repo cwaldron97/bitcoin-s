@@ -76,7 +76,7 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
   it should "get node addresses given a count" in {
     val addedF =
       clientF.flatMap(client =>
-        client.addNode(client.getDaemon.uri, AddNodeArgument.OneTry))
+        client.addNode(client.getDaemon.uri, AddNodeArgument.Add))
     val nodeF = clientF.flatMap(client => client.getNodeAddresses(1))
 
     nodeF.map({ result =>
