@@ -13,7 +13,6 @@ import org.bitcoins.rpc.client.common.{
 import org.bitcoins.rpc.config.BitcoindInstance
 import org.bitcoins.rpc.jsonmodels.{
   AddressInfoResult,
-  CreateWalletResult,
   SignRawTransactionResult,
   TestMempoolAcceptResult
 }
