@@ -118,10 +118,10 @@ trait ValidateAddressResult {
   def hdmasterkeyid: Option[Sha256Hash160Digest]
 
   @deprecated("Use 'getaddressinfo' instead", since = "0.16")
-  def ischange: Boolean
+  def ischange: Option[Boolean]
 
   @deprecated("Use 'getaddressinfo' instead", since = "0.16")
-  def solvable: Boolean
+  def solvable: Option[Boolean]
 
   @deprecated("Use 'getaddressinfo' instead", since = "0.16")
   def desc: Option[String]
@@ -142,8 +142,8 @@ case class ValidateAddressResultImpl(
     account: Option[String],
     hdkeypath: Option[String],
     hdmasterkeyid: Option[Sha256Hash160Digest],
-    ischange: Boolean,
-    solvable: Boolean,
+    ischange: Option[Boolean],
+    solvable: Option[Boolean],
     desc: Option[String])
     extends ValidateAddressResult
 

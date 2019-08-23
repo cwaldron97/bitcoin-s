@@ -9,9 +9,10 @@ import org.bitcoins.rpc.jsonmodels.{
   FundRawTransactionResult,
   GetRawTransactionResult,
   RpcTransaction,
-  SignRawTransactionResult
+  SignRawTransactionResult,
 }
 import org.bitcoins.rpc.serializers.JsonSerializers._
+import org.bitcoins.rpc.serializers.JsonWriters._
 import play.api.libs.json._
 
 import scala.concurrent.Future
