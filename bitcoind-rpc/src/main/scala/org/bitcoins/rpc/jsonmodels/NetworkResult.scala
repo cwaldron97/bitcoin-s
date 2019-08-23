@@ -4,7 +4,7 @@ import java.net.URI
 
 import org.bitcoins.core.currency.Bitcoins
 import org.bitcoins.core.number.{UInt32, UInt64}
-import org.bitcoins.core.wallet.fee.{SatoshisPerByte, SatoshisPerKiloByte}
+import org.bitcoins.core.wallet.fee.SatoshisPerKiloByte
 
 import scala.concurrent.duration.FiniteDuration
 
