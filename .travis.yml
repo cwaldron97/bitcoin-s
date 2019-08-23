@@ -45,7 +45,8 @@ install:
   - tar -xzf bitcoin-0.18.1-${PLATFORM}.tar.gz
   - export BITCOIND_V18_PATH=$(pwd)/bitcoin-0.18.1/bin
   # set default bitcoind to randomly choose between 0.17 and 0.18
-  - if [ $(($RANDOM%2)) == 1 ]; then BITCOIND_PATH=$BITCOIND_V17_PATH; else BITCOIND_PATH=$BITCOIND_V18_PATH; fi;
+ # - if [ $(($RANDOM%2)) == 1 ]; then BITCOIND_PATH=$BITCOIND_V17_PATH; else BITCOIND_PATH=$BITCOIND_V18_PATH; fi;
+  - BITCOIND_PATH=$BITCOIND_V17_PATH
   - export PATH=$BITCOIND_PATH:$PATH
   # # # Eclair
   - wget https://github.com/ACINQ/eclair/releases/download/v0.3.1/eclair-node-0.3.1-6906ecb.jar
