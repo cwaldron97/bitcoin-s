@@ -9,7 +9,7 @@ import org.bitcoins.rpc.jsonmodels.{
   FundRawTransactionResult,
   GetRawTransactionResult,
   RpcTransaction,
-  SignRawTransactionResult,
+  SignRawTransactionResult
 }
 import org.bitcoins.rpc.serializers.JsonSerializers._
 import org.bitcoins.rpc.serializers.JsonWriters._
@@ -113,4 +113,5 @@ trait RawTransactionRpc { self: Client =>
                                            List(JsString(transaction.hex),
                                                 Json.toJson(utxoDeps),
                                                 Json.toJson(sigHash)))
+
 }
