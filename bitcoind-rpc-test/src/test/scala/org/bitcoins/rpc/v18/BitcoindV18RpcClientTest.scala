@@ -16,6 +16,8 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
     val clientIsStartedF = BitcoindRpcTestUtil.startServers(Vector(client))
     clientIsStartedF.map(_ => client)
   }
+  lazy val clientPairF: Future[(BitcoindV18RpcClient, BitcoindV18RpcClient)] =
+    BitcoindRpcTestUtil.createNodePairV18(clientAccum)
 
   clientF.foreach(c => clientAccum.+=(c))
 
@@ -84,7 +86,7 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
   }
 
   it should "get node addresses given a count" in {
-    val addedF =
+    /* val addedF =
       clientF.flatMap(client =>
         client.addNode(client.getDaemon.uri, AddNodeArgument.Add))
     val nodeF = clientF.flatMap(client => client.getNodeAddresses(1))
@@ -92,7 +94,20 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
     nodeF.map({ result =>
       assert(result.head.address.isAbsolute)
       assert(result.head.services == 1)
-    })
+     */
+    for {
+      (freshClient, otherFreshClient) <- clientPairF
+      freshclientnode <- freshClient.addNode(freshClient.getDaemon.uri,
+                                             AddNodeArgument.Add)
+      otherFreshClientnode <- otherFreshClient.addNode(
+        otherFreshClient.getDaemon.uri,
+        AddNodeArgument.Add)
+      nodeaddress <- freshClient.getNodeAddresses(1)
+    } yield {
+      assert(nodeaddress.head.address == otherFreshClient.instance.uri)
+      assert(nodeaddress.head.services == 1)
+    }
+
   }
 
   it should "successfully submit a header" in {
