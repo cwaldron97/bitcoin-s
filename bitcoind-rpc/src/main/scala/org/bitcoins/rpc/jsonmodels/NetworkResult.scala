@@ -76,7 +76,7 @@ case class Peer(
     whitelisted: Boolean,
     bytessent_per_msg: Map[String, Int],
     bytesrecv_per_msg: Map[String, Int],
-    min_fee_filter: SatoshisPerKiloByte)
+    min_fee_filter: Option[SatoshisPerKiloByte])
     extends NetworkResult
 
 case class PeerNetworkInfo(
