@@ -148,7 +148,21 @@ object JsonSerializers {
     Json.reads[GetNetworkInfoResult]
 
   implicit val peerNetworkInfoReads: Reads[PeerNetworkInfo] =
-    Json.reads[PeerNetworkInfo]
+    ((__ \ "addr").read[URI] and
+      (__ \ "addrbind").read[URI] and
+      (__ \ "addrlocal").readNullable[URI] and
+      (__ \ "services").read[String] and
+      (__ \ "relaytxes").read[Boolean] and
+      (__ \ "lastsend").read[UInt32] and
+      (__ \ "lastrecv").read[UInt32] and
+      (__ \ "bytessent").read[Int] and
+      (__ \ "bytesrecv").read[Int] and
+      (__ \ "conntime").read[UInt32] and
+      (__ \ "timeoffset").read[Int] and
+      (__ \ "pingtime").readNullable[BigDecimal] and
+      (__ \ "minping").readNullable[BigDecimal] and
+      (__ \ "pingwait").readNullable[BigDecimal])(PeerNetworkInfo)
+
   implicit val peerReads: Reads[Peer] = Json.reads[Peer]
 
   implicit val nodeBanReads: Reads[NodeBan] = Json.reads[NodeBan]
