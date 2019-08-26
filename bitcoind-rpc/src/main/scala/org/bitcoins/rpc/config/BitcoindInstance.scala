@@ -14,7 +14,7 @@ import scala.util.Properties
 /**
   * Created by chris on 4/29/17.
   */
-sealed trait BitcoindInstance extends BitcoinSLogger {
+sealed trait generatrBitcoindInstance extends BitcoinSLogger {
 
   require(binary.exists,
           s"bitcoind binary path (${binary.getAbsolutePath}) does not exist!")

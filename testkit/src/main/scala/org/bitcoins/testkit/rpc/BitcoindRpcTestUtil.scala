@@ -379,6 +379,26 @@ trait BitcoindRpcTestUtil extends BitcoinSLogger {
     } yield hashes
   }
 
+  def generateToAddressAndSync(clinets: Vector[BitcoindRpcClient], blocks: Int = 6, address = _) (
+      implicit system: ActorSystem): Future[Vector[DoubleSha256DigestBE]] = {
+    require(clients.length > 1, "Can't sync less than 2 nodes")
+
+    import system.dispatcher
+
+    for {
+    hashes <- clients.head.generateToAddress(blocks, (clients.getAddress()))
+    _ <- {
+      val pairs = ListUtil.uniquePairs(clients)
+      val syncFuts = pairs.map {
+        case (first, second) =>
+        awaitSynced(first, second)
+      }
+      Future.sequence(syncFuts)
+    }
+    }
+  }
+  )
+
   def awaitSynced(
       client1: BitcoindRpcClient,
       client2: BitcoindRpcClient,
