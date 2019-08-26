@@ -408,7 +408,7 @@ object JsonSerializers {
 
       def reads(json: JsValue): JsResult[SatoshisPerKiloByte] =
         SerializerUtil.processJsNumber(num =>
-          SatoshisPerKiloByte(Satoshis(Int64(num.toBigInt)))(json)
+          SatoshisPerKiloByte(Satoshis(Int64(num.toBigInt))))(json)
     }
 
   implicit val arrayOfWalletsInputReads: Reads[ArrayOfWalletsInput] =
