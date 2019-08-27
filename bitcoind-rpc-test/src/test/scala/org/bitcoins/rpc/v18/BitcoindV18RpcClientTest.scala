@@ -85,7 +85,7 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
     }
   }
 
-  it should "get node addresses given a count" in {
+  it ignore should "get node addresses given a count" in {
     /* val addedF =
       clientF.flatMap(client =>
         client.addNode(client.getDaemon.uri, AddNodeArgument.Add))
@@ -103,7 +103,7 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
         otherFreshClient.getDaemon.uri,
         AddNodeArgument.Add)
       nodeaddress <- freshClient.getNodeAddresses(1)
-    } ignore yield {
+    } yield {
       assert(nodeaddress.head.address == otherFreshClient.instance.uri)
       assert(nodeaddress.head.services == 1)
     }

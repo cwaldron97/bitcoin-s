@@ -183,7 +183,7 @@ class TestRpcUtilTest extends BitcoindRpcTest {
     }
   }
 
-  it should "be able to wait for disconnected nodes" in {
+  it ignore should "be able to wait for disconnected nodes" in {
     for {
       (first, second) <- BitcoindRpcTestUtil.createUnconnectedNodePair(
         clientAccum)
@@ -198,7 +198,7 @@ class TestRpcUtilTest extends BitcoindRpcTest {
       _ <- first.disconnectNode(peerInfo.head.networkInfo.addr)
       _ <- BitcoindRpcTestUtil.awaitDisconnected(first, second)
       newPeerInfo <- first.getPeerInfo
-    } ignore yield assert(newPeerInfo.isEmpty)
+    } yield assert(newPeerInfo.isEmpty)
   }
 
   it should "be able to find outputs of previous transactions" in {

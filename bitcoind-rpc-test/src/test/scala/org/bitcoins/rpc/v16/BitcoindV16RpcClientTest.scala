@@ -37,7 +37,7 @@ class BitcoindV16RpcClientTest extends BitcoindRpcTest {
     }
   }
 
-  it should "be able to sign a raw transaction" in {
+  it ignore should "be able to sign a raw transaction" in {
     for {
       (client, otherClient) <- clientsF
       addr <- client.getNewAddress
@@ -65,7 +65,7 @@ class BitcoindV16RpcClientTest extends BitcoindRpcTest {
         client.createRawTransaction(Vector(input), outputs)
       }
       signedRawTx <- client.signRawTransaction(rawTx)
-    } ignore yield {
+    } yield {
       assert(signedRawTx.complete)
     }
   }

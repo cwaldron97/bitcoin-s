@@ -19,11 +19,11 @@ class P2PRpcTest extends BitcoindRpcTest {
 
   behavior of "P2PRpcTest"
 
-  it should "be able to get peer info" in {
+  it ignore should "be able to get peer info" in {
     for {
       (freshClient, otherFreshClient) <- clientPairF
       infoList <- freshClient.getPeerInfo
-    } ignore yield {
+    } yield {
       assert(infoList.length >= 0)
       val info = infoList.head
       assert(info.addnode)
