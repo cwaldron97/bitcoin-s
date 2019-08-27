@@ -65,7 +65,7 @@ class BitcoindV16RpcClientTest extends BitcoindRpcTest {
         client.createRawTransaction(Vector(input), outputs)
       }
       signedRawTx <- client.signRawTransaction(rawTx)
-    } yield {
+    } ignore yield {
       assert(signedRawTx.complete)
     }
   }

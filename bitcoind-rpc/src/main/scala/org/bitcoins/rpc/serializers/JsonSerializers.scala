@@ -386,21 +386,21 @@ object JsonSerializers {
   implicit val getNodeAddressesReads: Reads[GetNodeAddressesResult] =
     Reads[GetNodeAddressesResult] { js =>
       for {
-        time <- js.validate[Long].map(_.seconds)
-        services <- js.validate[Int]
-        address <- js.validate[URI]
-        port <- js.validate[Int]
+        time <- (js \ "time").validate[Long].map(_.seconds)
+        services <- (js \ "services").validate[Int]
+        address <- (js \ "address").validate[URI]
+        port <- (js \ "port").validate[Int]
       } yield GetNodeAddressesResult(time, services, address, port)
     }
 
-  implicit val RpcCommandsReads: Reads[RpcCommands] = Reads[RpcCommands] { js =>
+  implicit val rgetpcCommandsReads: Reads[RpcCommands] = Reads[RpcCommands] { js =>
     for {
       method <- (js \ "method").validate[String]
       duration <- (js \ "duration").validate[Long].map(_.microseconds)
     } yield RpcCommands(method, duration)
   }
 
-  implicit val GetRpcInfoResultReads: Reads[GetRpcInfoResult] =
+  implicit val getRpcInfoResultReads: Reads[GetRpcInfoResult] =
     Json.reads[GetRpcInfoResult]
 
   implicit val satsPerKbReads: Reads[SatoshisPerKiloByte] =

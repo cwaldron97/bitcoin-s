@@ -103,7 +103,7 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
         otherFreshClient.getDaemon.uri,
         AddNodeArgument.Add)
       nodeaddress <- freshClient.getNodeAddresses(1)
-    } yield {
+    } ignore yield {
       assert(nodeaddress.head.address == otherFreshClient.instance.uri)
       assert(nodeaddress.head.services == 1)
     }
