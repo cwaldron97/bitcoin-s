@@ -721,7 +721,10 @@ trait BitcoindRpcTestUtil extends BitcoinSLogger {
           case (Failure(_), Failure(_), Failure(_)) =>
             throw new RuntimeException(
               "Could not figure out version of provided bitcoind RPC client!")
-          case ((Success(_), Success(_), Success(_)) || (Success(_), Success(_), Failure(_)) || (Success(_), Failure(_), Success(_)) || (Failure(_), Success(_), Success(_))) =>
+          case _@((Success(_), Success(_), Success(_)) |
+                  (Success(_), Success(_), Failure(_)) |
+                  (Success(_), Failure(_), Success(_)) |
+                  (Failure(_), Success(_), Success(_))) =>
             throw new RuntimeException(
               "This should not happen, managed to construct different versioned RPC clients from one single client")
           case (Success(v16), Failure(_), Failure(_)) =>
