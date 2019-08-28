@@ -37,7 +37,7 @@ class BitcoindV16RpcClientTest extends BitcoindRpcTest {
     }
   }
 
-  it should "be able to sign a raw transaction" ignore in {
+  it should "be able to sign a raw transaction" ignore{
     for {
       (client, otherClient) <- clientsF
       addr <- client.getNewAddress
