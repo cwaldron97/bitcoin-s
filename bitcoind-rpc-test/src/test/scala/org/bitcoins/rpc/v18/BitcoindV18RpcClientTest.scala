@@ -85,7 +85,7 @@ class BitcoindV18RpcClientTest extends BitcoindRpcTest {
     }
   }
 
-  it ignore should "get node addresses given a count" in {
+  it should "get node addresses given a count" ignore in {
     /* val addedF =
       clientF.flatMap(client =>
         client.addNode(client.getDaemon.uri, AddNodeArgument.Add))

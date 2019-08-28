@@ -183,7 +183,7 @@ class TestRpcUtilTest extends BitcoindRpcTest {
     }
   }
 
-  it ignore should "be able to wait for disconnected nodes" in {
+  it should "be able to wait for disconnected nodes" ignore in {
     for {
       (first, second) <- BitcoindRpcTestUtil.createUnconnectedNodePair(
         clientAccum)
