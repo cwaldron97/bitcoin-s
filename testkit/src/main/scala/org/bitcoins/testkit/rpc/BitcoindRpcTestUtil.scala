@@ -29,6 +29,7 @@ import org.bitcoins.rpc.client.common.{
 }
 import org.bitcoins.rpc.client.v16.BitcoindV16RpcClient
 import org.bitcoins.rpc.client.v17.BitcoindV17RpcClient
+import org.bitcoins.rpc.client.v18.BitcoindV18RpcClient
 import org.bitcoins.rpc.config.{
   BitcoindAuthCredentials,
   BitcoindInstance,
@@ -45,7 +46,7 @@ import org.bitcoins.util.ListUtil
 import scala.annotation.tailrec
 import scala.collection.immutable.Map
 import scala.collection.mutable
-import scala.collection.JavaConverters._
+import org.bitcoins.core.compat.JavaConverters._
 import scala.concurrent._
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.util._
@@ -58,6 +59,7 @@ import java.nio.file.Path
 import org.bitcoins.rpc.client.common.BitcoindVersion.Unknown
 import org.bitcoins.rpc.client.common.BitcoindVersion.V16
 import org.bitcoins.rpc.client.common.BitcoindVersion.V17
+import org.bitcoins.rpc.client.common.BitcoindVersion.V18
 import java.nio.file.Files
 
 import org.bitcoins.testkit.util.FileUtil
@@ -163,7 +165,7 @@ trait BitcoindRpcTestUtil extends BitcoinSLogger {
   private def getBinary(version: BitcoindVersion): File = version match {
     // default to newest version
     case Unknown => getBinary(BitcoindVersion.newest)
-    case known @ (V16 | V17) =>
+    case known @ (V16 | V17 | V18) =>
       val versionFolder = Files
         .list(binaryDirectory)
         .iterator()
@@ -185,7 +187,7 @@ trait BitcoindRpcTestUtil extends BitcoinSLogger {
 
       versionFolder
         .resolve("bin")
-        .resolve("bitcoind")
+        .resolve(if (Properties.isWin) "bitcoind.exe" else "bitcoind")
         .toFile()
   }
 
@@ -257,12 +259,25 @@ trait BitcoindRpcTestUtil extends BitcoinSLogger {
              pruneMode = pruneMode,
              versionOpt = Some(BitcoindVersion.V17))
 
+  def v18Instance(
+      port: Int = RpcUtil.randomPort,
+      rpcPort: Int = RpcUtil.randomPort,
+      zmqPort: Int = RpcUtil.randomPort,
+      pruneMode: Boolean = false
+  ): BitcoindInstance =
+    instance(port = port,
+             rpcPort = rpcPort,
+             zmqPort = zmqPort,
+             pruneMode = pruneMode,
+             versionOpt = Some(BitcoindVersion.V18))
+
   def startServers(servers: Vector[BitcoindRpcClient])(
       implicit ec: ExecutionContext): Future[Unit] = {
     val startedServers = servers.map(_.start())
 
     Future.sequence(startedServers).map(_ => ())
   }
+
 
   /**
     * Stops the given servers and deletes their data directories
@@ -541,6 +556,8 @@ trait BitcoindRpcTestUtil extends BitcoinSLogger {
           new BitcoindV16RpcClient(BitcoindRpcTestUtil.v16Instance())
         case BitcoindVersion.V17 =>
           new BitcoindV17RpcClient(BitcoindRpcTestUtil.v17Instance())
+        case BitcoindVersion.V18 =>
+          new BitcoindV17RpcClient(BitcoindRpcTestUtil.v18Instance())
       }
 
       // this is safe as long as this method is never
@@ -605,6 +622,15 @@ trait BitcoindRpcTestUtil extends BitcoinSLogger {
       implicit system: ActorSystem): Future[
     (BitcoindV17RpcClient, BitcoindV17RpcClient)] =
     createNodePairInternal(BitcoindVersion.V17, clientAccum)
+
+  /**
+    * Returns a pair of [[org.bitcoins.rpc.client.v18.BitcoindV18RpcClient BitcoindV18RpcClient]]
+    * that are connected with some blocks in the chain
+    */
+  def createNodePairV18(clientAccum: RpcClientAccum = Vector.newBuilder)(
+      implicit system: ActorSystem): Future[
+    (BitcoindV18RpcClient, BitcoindV18RpcClient)] =
+    createNodePairInternal(BitcoindVersion.V18, clientAccum)
 
   /**
     * Returns a triple of [[org.bitcoins.rpc.client.common.BitcoindRpcClient BitcoindRpcClient]]
